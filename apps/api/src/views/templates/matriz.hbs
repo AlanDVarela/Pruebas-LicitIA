@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Matriz comparativa {{folio}}</title>
+<style>{{> estilos}} body{max-width:1100px}</style></head>
+<body>
+{{marcaBorrador estado}}
+<h1>Matriz comparativa de propuestas</h1>
+<div class="meta">{{dependencia}} · Procedimiento {{folio}} · {{titulo}}</div>
+
+<h2>1. Cumplimiento por requisito</h2>
+<table>
+  <tr><th>#</th><th>Requisito</th><th>Carácter</th>{{#each licitantes}}<th>{{razonSocial}}</th>{{/each}}</tr>
+  {{#each filas}}
+  <tr><td>{{n}}</td><td>{{descripcion}}</td><td>{{#if obligatorio}}Obligatorio{{else}}Opcional{{/if}}</td>
+    {{#each celdas}}<td class="c">{{estadoCumple estado}}</td>{{/each}}</tr>
+  {{/each}}
+</table>
+
+<h2>2. Observaciones</h2>
+{{#if observaciones.length}}
+<table>
+  <tr><th>Licitante</th><th>Req.</th><th>Resultado</th><th>Motivo</th></tr>
+  {{#each observaciones}}<tr><td>{{licitante}}</td><td>{{n}}</td><td>{{estadoCumple estado}}</td><td>{{#if comentario}}{{comentario}}{{else}}—{{/if}}</td></tr>{{/each}}
+</table>
+{{else}}<p>Todos los licitantes cumplen todos los requisitos.</p>{{/if}}
+
+{{#if alertas.length}}<h2>3. Avisos del sistema</h2><ul>{{#each alertas}}<li>{{mensaje}}</li>{{/each}}</ul>{{/if}}
+
+<div class="pie">Versión {{version}} · Generado el {{fecha generadoEn}} por {{generadoPor}} · Cada resultado fue confirmado por una persona del área técnica ·
+{{#if (eq estado "AUTORIZADO")}}Documento autorizado{{else}}Borrador sujeto a revisión y autorización{{/if}}</div>
+</body></html>

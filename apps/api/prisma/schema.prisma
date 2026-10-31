@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  REQUIRENTE
+  TECNICO
+  JURIDICO
+  AUTORIDAD
+  CONTROL_INTERNO
+  ADMIN
+}
+
+enum TipoDocumento {
+  ANEXO_TECNICO
+  MATRIZ
+  DICTAMEN
+}
+
+enum EstadoDocumento {
+  BORRADOR
+  EN_REVISION_TECNICA
+  EN_REVISION_JURIDICA
+  PENDIENTE_AUTORIZACION
+  AUTORIZADO
+}
+
+model Dependencia {
+  id            String          @id @default(uuid())
+  nombre        String
+  municipio     String?
+  usuarios      Usuario[]
+  procedimientos Procedimiento[]
+}
+
+model Usuario {
+  id             String      @id @default(uuid())
+  dependenciaId  String
+  dependencia    Dependencia @relation(fields: [dependenciaId], references: [id])
+  nombre         String
+  email          String      @unique
+  passwordHash   String
+  rol            Rol
+  activo         Boolean     @default(true)
+  creadoEn       DateTime    @default(now())
+}
+
+model Procedimiento {
+  id            String      @id @default(uuid())
+  dependenciaId String
+  dependencia   Dependencia @relation(fields: [dependenciaId], references: [id])
+  folio         String
+  titulo        String
+  tipo          String
+  estado        String      @default("CAPTURA")
+  // Respuestas del cuestionario guiado, validadas con los esquemas Zod de @licitaia/shared.
+  datos         Json        @default("{}")
+  creadoPorId   String
+  creadoEn      DateTime    @default(now())
+  actualizadoEn DateTime    @updatedAt
+  documentos    Documento[]
+  licitantes    Licitante[]
+
+  @@unique([dependenciaId, folio])
+}
+
+model Documento {
+  id             String            @id @default(uuid())
+  procedimientoId String
+  procedimiento  Procedimiento     @relation(fields: [procedimientoId], references: [id])
+  tipo           TipoDocumento
+  estado         EstadoDocumento   @default(BORRADOR)
+  versionActual  Int               @default(1)
+  versiones      DocumentoVersion[]
+
+  @@unique([procedimientoId, tipo])
+}
+
+model DocumentoVersion {
+  id            String    @id @default(uuid())
+  documentoId   String
+  documento     Documento @relation(fields: [documentoId], references: [id])
+  version       Int
+  contexto      Json
+  alertas       Json
+  generadoPorId String
+  usoIA         Json?
+  creadoEn      DateTime  @default(now())
+
+  @@unique([documentoId, version])
+}
+
+// Registro de solo adición, encadenado por hash. Un trigger (triggers.sql) impide UPDATE/DELETE.
+model Bitacora {
+  id            Int      @id @default(autoincrement())
+  dependenciaId String
+  usuarioId     String?
+  accion        String
+  entidad       String
+  entidadId     String
+  datos         Json
+  hashPrevio    String
+  hash          String
+  creadoEn      DateTime
+
+  @@index([dependenciaId, id])
+}
+
+enum EstadoEvaluacion {
+  PENDIENTE
+  CUMPLE
+  NO_CUMPLE
+  FALTA
+}
+
+model Licitante {
+  id              String        @id @default(uuid())
+  procedimientoId String
+  procedimiento   Procedimiento @relation(fields: [procedimientoId], references: [id])
+  razonSocial     String
+  rfc             String?
+  creadoEn        DateTime      @default(now())
+  propuestas      Propuesta[]
+  evaluaciones    Evaluacion[]
+
+  @@unique([procedimientoId, razonSocial])
+}
+
+model Propuesta {
+  id               String    @id @default(uuid())
+  licitanteId      String
+  licitante        Licitante @relation(fields: [licitanteId], references: [id])
+  nombreArchivo    String
+  formato          String
+  tamano           Int
+  storageKey       String
+  texto            String    @db.Text
+  // OK = texto extraído · SIN_TEXTO = escaneado o vacío (requiere captura manual) · ERROR = no se pudo leer
+  estadoExtraccion String
+  subidoPorId      String
+  creadoEn         DateTime  @default(now())
+}
+
+// Una celda de la matriz. `estado` solo cambia por decisión de una persona;
+// `sugerido` y `evidencia` los propone el sistema.
+model Evaluacion {
+  id              String           @id @default(uuid())
+  procedimientoId String
+  requisitoId     String
+  licitanteId     String
+  licitante       Licitante        @relation(fields: [licitanteId], references: [id])
+  estado          EstadoEvaluacion @default(PENDIENTE)
+  sugerido        EstadoEvaluacion?
+  evidencia       String?          @db.Text
+  propuestaId     String?
+  comentario      String?          @db.Text
+  confirmadoPorId String?
+  confirmadoEn    DateTime?
+
+  @@unique([licitanteId, requisitoId])
+  @@index([procedimientoId])
+}

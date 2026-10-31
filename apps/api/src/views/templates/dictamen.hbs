@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Dictamen técnico {{folio}}</title>
+<style>{{> estilos}}</style></head>
+<body>
+{{marcaBorrador estado}}
+<h1>Dictamen técnico</h1>
+<div class="meta">{{dependencia}} · Procedimiento {{folio}} · Licitación pública de bienes y servicios generales</div>
+
+<h2>1. Antecedentes</h2>
+<p><strong>Procedimiento:</strong> {{titulo}}</p>
+<p><strong>Objeto de la contratación:</strong> {{generales.objeto}}</p>
+<p><strong>Área requirente:</strong> {{generales.areaRequirente}}</p>
+<p>Presentación y apertura de propuestas: {{fecha fechas.apertura}}. Fallo previsto: {{fecha fechas.fallo}}.</p>
+<p>Presentaron propuesta: {{#each resultados}}{{razonSocial}}{{#unless @last}}, {{/unless}}{{/each}}.</p>
+
+<h2>2. Criterios de evaluación</h2>
+<p>Se verificó el cumplimiento de los siguientes requisitos obligatorios. Una propuesta se considera solvente técnicamente cuando cumple todos ellos.</p>
+<table>
+  <tr><th>#</th><th>Requisito obligatorio</th><th>Criterio de evaluación</th></tr>
+  {{#each requisitosObligatorios}}<tr><td>{{n}}</td><td>{{descripcion}}</td><td>{{#if criterio}}{{criterio}}{{else}}—{{/if}}</td></tr>{{/each}}
+</table>
+
+<h2>3. Resultado por licitante</h2>
+{{#each resultados}}
+<h3>{{razonSocial}}{{#if rfc}} · RFC {{rfc}}{{/if}} — {{#if solvente}}<span class="ok">Cumple</span>{{else}}<span class="no">No cumple</span>{{/if}}</h3>
+<p class="meta">Documentos revisados: {{#if documentos.length}}{{#each documentos}}{{this}}{{#unless @last}}; {{/unless}}{{/each}}{{else}}ninguno{{/if}}</p>
+{{#if solvente}}
+  <p>Cumple todos los requisitos obligatorios.</p>
+  {{#each sustentos}}<p class="evid">«{{evidencia}}» — {{requisito}}</p>{{/each}}
+{{else}}
+  <table>
+    <tr><th>Requisito no satisfecho</th><th>Resultado</th><th>Fundamento</th></tr>
+    {{#each incumplimientos}}<tr><td>{{requisito}}</td><td>{{estadoCumple estado}}</td><td>{{#if comentario}}{{comentario}}{{else}}—{{/if}}</td></tr>{{/each}}
+  </table>
+{{/if}}
+{{/each}}
+
+<h2>4. Conclusión</h2>
+<p>Con base en la evaluación técnica confirmada por el área técnica, se propone:</p>
+<ul>
+  <li><strong>Solventes técnicamente:</strong> {{#if solventes.length}}{{#each solventes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}ninguno{{/if}}.</li>
+  <li><strong>No solventes técnicamente:</strong> {{#if noSolventes.length}}{{#each noSolventes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{else}}ninguno{{/if}}.</li>
+</ul>
+<p>Este dictamen no adjudica el contrato. La adjudicación corresponde a la autoridad competente en el fallo.</p>
+
+<div class="firmas">
+  <div class="firma">Área técnica</div><div class="firma">Área jurídica</div><div class="firma">Autoridad competente</div>
+</div>
+
+<div class="pie">Versión {{version}} · Generado el {{fecha generadoEn}} por {{generadoPor}} ·
+{{#if (eq estado "AUTORIZADO")}}Documento autorizado{{else}}Borrador sujeto a revisión y autorización de la autoridad competente{{/if}}</div>
+</body></html>

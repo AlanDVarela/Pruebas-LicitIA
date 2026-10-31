@@ -1,0 +1,44 @@
+[
+  {
+    "id": "REQ-001",
+    "descripcion": "El objeto de la contratación debe estar capturado",
+    "severidad": "ERROR",
+    "fundamento": null,
+    "check": { "tipo": "noVacio", "ruta": "generales.objeto" }
+  },
+  {
+    "id": "REQ-002",
+    "descripcion": "Debe existir al menos una partida",
+    "severidad": "ERROR",
+    "fundamento": null,
+    "check": { "tipo": "minItems", "ruta": "partidas", "min": 1 }
+  },
+  {
+    "id": "REQ-003",
+    "descripcion": "Todo requisito obligatorio debe tener criterio de evaluación",
+    "severidad": "ERROR",
+    "fundamento": null,
+    "check": { "tipo": "cadaItem", "ruta": "requisitos", "si": { "obligatorio": true }, "noVacio": "criterioEvaluacion" }
+  },
+  {
+    "id": "REQ-004",
+    "descripcion": "Si hay partidas, debe haber al menos un requisito técnico",
+    "severidad": "ERROR",
+    "fundamento": null,
+    "check": { "tipo": "partidasConRequisitoTecnico" }
+  },
+  {
+    "id": "REQ-005",
+    "descripcion": "Las fechas deben seguir el orden publicación < aclaraciones < apertura < fallo",
+    "severidad": "ERROR",
+    "fundamento": null,
+    "check": { "tipo": "ordenFechas", "rutas": ["fechas.publicacion", "fechas.aclaraciones", "fechas.apertura", "fechas.fallo"] }
+  },
+  {
+    "id": "REQ-006",
+    "descripcion": "Requisito que menciona marca o modelo sin 'o equivalente': puede ser restrictivo",
+    "severidad": "ADVERTENCIA",
+    "fundamento": null,
+    "check": { "tipo": "textoRestrictivo", "ruta": "requisitos", "campo": "descripcion" }
+  }
+]

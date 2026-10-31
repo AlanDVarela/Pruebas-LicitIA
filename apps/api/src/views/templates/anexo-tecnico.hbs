@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Anexo técnico {{folio}}</title>
+<style>{{> estilos}}</style>
+</head>
+<body>
+{{marcaBorrador estado}}
+<h1>Anexo técnico</h1>
+<div class="meta">{{dependencia}} · Procedimiento {{folio}} · Licitación pública de bienes y servicios generales</div>
+
+<h2>1. Datos generales</h2>
+<p><strong>Título:</strong> {{titulo}}</p>
+<p><strong>Objeto de la contratación:</strong> {{generales.objeto}}</p>
+<p><strong>Área requirente:</strong> {{generales.areaRequirente}}</p>
+<p><strong>Justificación:</strong> {{generales.justificacion}}</p>
+{{#if descripcionIA}}{{seccionIA descripcionIA}}{{/if}}
+
+<h2>2. Partidas</h2>
+<table>
+  <tr><th>#</th><th>Descripción</th><th>Cantidad</th><th>Unidad</th><th>Monto máximo</th></tr>
+  {{#each partidas}}
+  <tr><td>{{inc @index}}</td><td>{{descripcion}}</td><td>{{cantidad}} ({{numeroLetra cantidad}})</td><td>{{unidad}}</td><td>{{moneda montoMaximo}}</td></tr>
+  {{/each}}
+</table>
+
+<h2>3. Requisitos</h2>
+{{#each requisitosPorCategoria}}
+<h3 style="font-size:13px;margin:14px 0 4px">{{etiqueta}}</h3>
+<table>
+  <tr><th>#</th><th>Requisito</th><th>Carácter</th><th>Criterio de evaluación</th></tr>
+  {{#each items}}
+  <tr><td>{{inc @index}}</td><td>{{descripcion}}</td><td>{{#if obligatorio}}Obligatorio{{else}}Opcional{{/if}}</td><td>{{#if criterioEvaluacion}}{{criterioEvaluacion}}{{else}}—{{/if}}</td></tr>
+  {{/each}}
+</table>
+{{/each}}
+
+<h2>4. Calendario</h2>
+<table>
+  <tr><th>Publicación de la convocatoria</th><td>{{fecha fechas.publicacion}}</td></tr>
+  <tr><th>Junta de aclaraciones</th><td>{{fecha fechas.aclaraciones}}</td></tr>
+  <tr><th>Presentación y apertura de propuestas</th><td>{{fecha fechas.apertura}}</td></tr>
+  <tr><th>Fallo</th><td>{{fecha fechas.fallo}}</td></tr>
+</table>
+
+{{#if alertas.length}}
+<h2>5. Observaciones del sistema</h2>
+<ul>{{#each alertas}}<li><strong>{{severidad}}</strong> · {{mensaje}}</li>{{/each}}</ul>
+{{/if}}
+
+<div class="pie">
+  Versión {{version}} · Generado el {{fecha generadoEn}} por {{generadoPor}} ·
+  {{#if (eq estado "AUTORIZADO")}}Documento autorizado{{else}}Borrador sujeto a revisión y autorización de la autoridad competente{{/if}}
+</div>
+</body>
+</html>

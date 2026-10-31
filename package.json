@@ -1,0 +1,15 @@
+{
+  "name": "licitaia",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "up": "docker compose up --build",
+    "down": "docker compose down",
+    "reset": "docker compose down -v",
+    "logs": "docker compose logs -f api web",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "test": "npm run test -w @licitaia/api"
+  }
+}
